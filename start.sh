@@ -1,3 +1,5 @@
+set -eux
+
 if test -f ./bin/php7/bin/php
 then
 	export PHPRC=""
@@ -6,4 +8,12 @@ else
 	export PHP_BINARY=php
 fi
 
-${PHP_BINARY} -c bin/php7 src/pocketmine/PocketMine.php  --data=Server --plugins=Server/plugins $@
+export PMMP=src/pocketmine/PocketMine.php
+
+if test -f PocketMine-MP.phar  
+then
+	export PMMP=PocketMine-MP.phar
+fi
+
+
+${PHP_BINARY} -c bin/php7 ${PMMP} --data=Server --plugins=Server/plugins $@
