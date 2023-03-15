@@ -1,0 +1,7 @@
+{
+	"php.version": "8.2-pm",
+	"php.stubs": [
+		"*",
+		"posix"
+	]
+}
