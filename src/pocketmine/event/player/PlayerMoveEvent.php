@@ -23,7 +23,7 @@ namespace pocketmine\event\player;
 
 use pocketmine\event\Cancellable;
 use pocketmine\level\Location;
-use pocketmine\player\Player;
+use pocketmine\Player;
 
 class PlayerMoveEvent extends PlayerEvent implements Cancellable
 {

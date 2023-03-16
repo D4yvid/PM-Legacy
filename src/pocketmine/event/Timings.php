@@ -23,7 +23,7 @@ namespace pocketmine\event;
 
 use pocketmine\entity\Entity;
 use pocketmine\network\protocol\DataPacket;
-use pocketmine\player\Player;
+use pocketmine\Player;
 use pocketmine\plugin\PluginManager;
 use pocketmine\scheduler\PluginTask;
 use pocketmine\scheduler\TaskHandler;

@@ -23,7 +23,7 @@ namespace pocketmine\event\block;
 
 use pocketmine\block\Block;
 use pocketmine\event\Cancellable;
-use pocketmine\player\Player;
+use pocketmine\Player;
 
 /**
  * Called when a sign is changed by a player.

@@ -22,7 +22,7 @@
 namespace pocketmine\event\player;
 
 use pocketmine\event\Cancellable;
-use pocketmine\player\Player;
+use pocketmine\Player;
 
 /**
  * Called when a player runs a command or chats, early in the process

@@ -22,7 +22,7 @@
 namespace pocketmine\event\player;
 
 use pocketmine\event\Cancellable;
-use pocketmine\player\Player;
+use pocketmine\Player;
 
 class PlayerToggleSneakEvent extends PlayerEvent implements Cancellable
 {

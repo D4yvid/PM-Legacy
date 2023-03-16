@@ -21,7 +21,7 @@
 
 namespace pocketmine\event\server;
 
-use pocketmine\player\Player;
+use pocketmine\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
 use pocketmine\utils\Binary;

@@ -23,7 +23,7 @@ namespace pocketmine\event\server;
 
 use pocketmine\event\Cancellable;
 use pocketmine\network\protocol\DataPacket;
-use pocketmine\player\Player;
+use pocketmine\Player;
 
 class DataPacketSendEvent extends ServerEvent implements Cancellable
 {

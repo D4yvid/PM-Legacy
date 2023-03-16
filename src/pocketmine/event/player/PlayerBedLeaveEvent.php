@@ -22,7 +22,7 @@
 namespace pocketmine\event\player;
 
 use pocketmine\block\Block;
-use pocketmine\player\Player;
+use pocketmine\Player;
 
 class PlayerBedLeaveEvent extends PlayerEvent
 {

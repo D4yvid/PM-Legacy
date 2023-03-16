@@ -22,7 +22,7 @@
 namespace pocketmine\event\player;
 
 use pocketmine\level\Position;
-use pocketmine\player\Player;
+use pocketmine\Player;
 
 /**
  * Called when a player is respawned (or first time spawned)

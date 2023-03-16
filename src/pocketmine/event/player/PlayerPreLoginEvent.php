@@ -22,7 +22,7 @@
 namespace pocketmine\event\player;
 
 use pocketmine\event\Cancellable;
-use pocketmine\player\Player;
+use pocketmine\Player;
 
 /**
  * Called when the player logs in, before things have been set up

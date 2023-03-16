@@ -23,7 +23,7 @@ namespace pocketmine\event\player;
 
 use pocketmine\event\Cancellable;
 use pocketmine\item\Item;
-use pocketmine\player\Player;
+use pocketmine\Player;
 
 class PlayerItemHeldEvent extends PlayerEvent implements Cancellable
 {
