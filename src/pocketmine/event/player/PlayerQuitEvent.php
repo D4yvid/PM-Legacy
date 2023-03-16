@@ -21,7 +21,7 @@
 
 namespace pocketmine\event\player;
 
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 /**
  * Called when a player leaves the server

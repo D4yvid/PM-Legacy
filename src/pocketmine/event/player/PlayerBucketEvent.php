@@ -24,7 +24,7 @@ namespace pocketmine\event\player;
 use pocketmine\block\Block;
 use pocketmine\event\Cancellable;
 use pocketmine\item\Item;
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 abstract class PlayerBucketEvent extends PlayerEvent implements Cancellable
 {

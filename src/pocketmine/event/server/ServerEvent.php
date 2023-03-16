@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  *
  *  ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
@@ -19,34 +19,15 @@
  *
  */
 
-namespace pocketmine\event\inventory;
+/**
+ * Events related to the server core, like networking, stop, level loading
+ */
 
-use pocketmine\inventory\Inventory;
-use pocketmine\player\Player;
+namespace pocketmine\event\server;
 
-class InventoryCloseEvent extends InventoryEvent
+use pocketmine\event\Event;
+
+abstract class ServerEvent extends Event
 {
-	public static $handlerList = null;
-
-	/** @var Player */
-	private $who;
-
-	/**
-	 * @param Inventory $inventory
-	 * @param Player $who
-	 */
-	public function __construct(Inventory $inventory, Player $who)
-	{
-		$this->who = $who;
-		parent::__construct($inventory);
-	}
-
-	/**
-	 * @return Player
-	 */
-	public function getPlayer()
-	{
-		return $this->who;
-	}
 
 }

@@ -19,34 +19,32 @@
  *
  */
 
-namespace pocketmine\event\inventory;
+namespace pocketmine\event\server;
 
-use pocketmine\inventory\Inventory;
+use pocketmine\event\Cancellable;
+use pocketmine\network\protocol\DataPacket;
 use pocketmine\player\Player;
 
-class InventoryCloseEvent extends InventoryEvent
+class DataPacketSendEvent extends ServerEvent implements Cancellable
 {
 	public static $handlerList = null;
 
-	/** @var Player */
-	private $who;
+	private $packet;
+	private $player;
 
-	/**
-	 * @param Inventory $inventory
-	 * @param Player $who
-	 */
-	public function __construct(Inventory $inventory, Player $who)
+	public function __construct(Player $player, DataPacket $packet)
 	{
-		$this->who = $who;
-		parent::__construct($inventory);
+		$this->packet = $packet;
+		$this->player = $player;
 	}
 
-	/**
-	 * @return Player
-	 */
+	public function getPacket()
+	{
+		return $this->packet;
+	}
+
 	public function getPlayer()
 	{
-		return $this->who;
+		return $this->player;
 	}
-
 }

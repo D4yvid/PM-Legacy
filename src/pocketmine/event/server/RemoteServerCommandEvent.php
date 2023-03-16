@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  *
  *  ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
@@ -19,34 +19,24 @@
  *
  */
 
-namespace pocketmine\event\inventory;
+namespace pocketmine\event\server;
 
-use pocketmine\inventory\Inventory;
-use pocketmine\player\Player;
+use pocketmine\command\CommandSender;
 
-class InventoryCloseEvent extends InventoryEvent
+/**
+ * This event is called when a command is received over RCON.
+ */
+class RemoteServerCommandEvent extends ServerCommandEvent
 {
 	public static $handlerList = null;
 
-	/** @var Player */
-	private $who;
-
 	/**
-	 * @param Inventory $inventory
-	 * @param Player $who
+	 * @param CommandSender $sender
+	 * @param string $command
 	 */
-	public function __construct(Inventory $inventory, Player $who)
+	public function __construct(CommandSender $sender, $command)
 	{
-		$this->who = $who;
-		parent::__construct($inventory);
-	}
-
-	/**
-	 * @return Player
-	 */
-	public function getPlayer()
-	{
-		return $this->who;
+		parent::__construct($sender, $command);
 	}
 
 }

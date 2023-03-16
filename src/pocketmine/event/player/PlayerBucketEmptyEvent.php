@@ -23,7 +23,7 @@ namespace pocketmine\event\player;
 
 use pocketmine\block\Block;
 use pocketmine\item\Item;
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 class PlayerBucketEmptyEvent extends PlayerBucketEvent
 {

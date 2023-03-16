@@ -24,7 +24,7 @@ namespace pocketmine\event\player;
 use pocketmine\event\entity\EntityDeathEvent;
 use pocketmine\event\TextContainer;
 use pocketmine\item\Item;
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 class PlayerDeathEvent extends EntityDeathEvent
 {

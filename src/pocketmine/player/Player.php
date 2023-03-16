@@ -19,9 +19,10 @@
  *
  */
 
-namespace pocketmine;
+namespace pocketmine\player;
 
 use InvalidStateException;
+use pocketmine\Achievement;
 use pocketmine\block\Air;
 use pocketmine\block\Block;
 use pocketmine\command\CommandSender;
@@ -78,6 +79,7 @@ use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\inventory\SimpleTransactionGroup;
+use pocketmine\IPlayer;
 use pocketmine\item\Item;
 use pocketmine\level\ChunkLoader;
 use pocketmine\level\format\FullChunk;
@@ -127,9 +129,11 @@ use pocketmine\network\protocol\TextPacket;
 use pocketmine\network\protocol\UpdateAttributesPacket;
 use pocketmine\network\protocol\UpdateBlockPacket;
 use pocketmine\network\SourceInterface;
+use pocketmine\permission;
 use pocketmine\permission\PermissibleBase;
 use pocketmine\permission\PermissionAttachment;
 use pocketmine\plugin\Plugin;
+use pocketmine\Server;
 use pocketmine\tile\Sign;
 use pocketmine\tile\Spawnable;
 use pocketmine\tile\Tile;
@@ -152,19 +156,16 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
 	const VIEW = Player::SPECTATOR;
 
 	const SURVIVAL_SLOTS = 36;
-	const CREATIVE_SLOTS = 112;
-	/** @var bool */
-	public $playedBefore;
-	public $spawned = false;
-	public $loggedIn = false;
+	public bool $playedBefore;
+	public bool $spawned = false;
+	public bool $loggedIn = false;
 	public $gamemode;
 	public $lastBreak;
 	/** @var Vector3 */
 	public $speed = null;
 	public $blocked = false;
 	public $achievements = [];
-	public $lastCorrect;
-public $craftingType = 0;
+	public $craftingType = 0;
 	public $creationTime = 0;
 	public $usedChunks = [];
 	/** @var SourceInterface */
@@ -175,13 +176,10 @@ public $craftingType = 0;
 	/** @var Inventory[] */
 	protected $windowIndex = [];
 	protected $messageCounter = 2;
-		protected $sendIndex = 0; // 0 = 2x2 crafting, 1 = 3x3 crafting, 2 = stonecutter
 	/** @var SimpleTransactionGroup */
 	protected $currentTransaction = null;
-	protected $isCrafting = false;
 	protected $randomClientId;
 
-	protected $lastMovement = 0;
 	/** @var Vector3 */
 	protected $forceMovement = null;
 	/** @var Vector3 */
@@ -213,25 +211,15 @@ public $craftingType = 0;
 	protected $autoJump = true;
 	protected $allowFlight = false;
 	private $clientSecret;
-	private $loaderId = null;
-	/** @var null|Position */
-	private $spawnPosition = null;
-	private $needACK = [];
+	private ?int $loaderId = null;
+	private ?Position $spawnPosition = null;
+	private readonly array $needACK;
 
 	private $batchedPackets = [];
 
-	/** @var PermissibleBase */
-	private $perm = null;
+	private ?PermissibleBase $perm = null;
 
-	/**
-	 * @param int $chunkX
-	 * @param int $chunkZ
-	 * @param string $payload
-	 * @param int $ordering
-	 *
-	 * @return DataPacket
-	 */
-	public static function getChunkCacheFromData($chunkX, $chunkZ, $payload, $ordering = FullChunkDataPacket::ORDER_COLUMNS)
+	public static function getChunkCacheFromData(int $chunkX, int $chunkZ, string $payload, int $ordering = FullChunkDataPacket::ORDER_COLUMNS): BatchPacket|DataPacket
 	{
 		$pk = new FullChunkDataPacket();
 		$pk->chunkX = $chunkX;
@@ -246,19 +234,6 @@ public $craftingType = 0;
 		$batch->encode();
 		$batch->isEncoded = true;
 		return $batch;
-	}
-
-	/**
-	 * This might disappear in the future.
-	 * Please use getUniqueId() instead (IP + clientId + name combo, in the future it'll change to real UUID for online
-	 * auth)
-	 *
-	 * @deprecated
-	 *
-	 */
-	public function getClientId()
-	{
-		return $this->randomClientId;
 	}
 
 	public function getClientSecret()
@@ -3186,6 +3161,7 @@ public $craftingType = 0;
 		$this->rawUUID = null;
 
 		$this->creationTime = microtime(true);
+		$this->needACK = [];
 	}
 
 	/**

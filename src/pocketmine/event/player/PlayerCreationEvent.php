@@ -23,7 +23,7 @@ namespace pocketmine\event\player;
 
 use pocketmine\event\Event;
 use pocketmine\network\SourceInterface;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use RuntimeException;
 
 /**

@@ -23,7 +23,7 @@ namespace pocketmine\event\player;
 
 use pocketmine\entity\Human;
 use pocketmine\event\Cancellable;
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 class PlayerExhaustEvent extends PlayerEvent implements Cancellable
 {
