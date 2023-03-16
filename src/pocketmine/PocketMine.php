@@ -61,9 +61,14 @@ namespace {
 	}
 
 	define("DIR_SEP", DIRECTORY_SEPARATOR);
+	define("DEBUG", 1);
 }
 
 namespace pocketmine {
+
+	if (!defined("DEBUG")) {
+		error_reporting(0);
+	}
 
 	use Exception;
 	use Phar;
