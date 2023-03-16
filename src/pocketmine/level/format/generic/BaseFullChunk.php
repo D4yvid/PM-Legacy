@@ -17,7 +17,7 @@
  * @link http://www.pocketmine.net/
  *
  *
-*/
+ */
 
 namespace pocketmine\level\format\generic;
 
@@ -89,8 +89,8 @@ abstract class BaseFullChunk implements FullChunk
 	protected function __construct($provider, $x, $z, $blocks, $data, $skyLight, $blockLight, array $biomeColors = [], array $heightMap = [], array $entities = [], array $tiles = [], array $extraData = [])
 	{
 		$this->provider = $provider;
-		$this->x = (int)$x;
-		$this->z = (int)$z;
+		$this->x = (int) $x;
+		$this->z = (int) $z;
 
 		$this->blocks = $blocks;
 		$this->data = $data;
@@ -133,7 +133,8 @@ abstract class BaseFullChunk implements FullChunk
 							continue;
 						}
 
-						if (($nbt["Pos"][0] >> 4) !== $this->x or ($nbt["Pos"][2] >> 4) !== $this->z) {
+						if (((int) $nbt["Pos"][0] >> 4) !== $this->getFloorX() or ((int) $nbt["Pos"][2] >> 4) !== $this->getFloorZ()) {
+
 							$changed = true;
 							continue; // Fixes entities allocated in wrong chunks.
 						}
@@ -195,7 +196,7 @@ abstract class BaseFullChunk implements FullChunk
 
 	public function setChanged($changed = true)
 	{
-		$this->hasChanged = (bool)$changed;
+		$this->hasChanged = (bool) $changed;
 	}
 
 	public function getBiomeId($x, $z)
@@ -358,6 +359,16 @@ abstract class BaseFullChunk implements FullChunk
 	public function getZ()
 	{
 		return $this->z;
+	}
+
+	public function getFloorX()
+	{
+		return (int) floor($this->x);
+	}
+
+	public function getFloorZ()
+	{
+		return (int) floor($this->z);
 	}
 
 	public function setZ($z)

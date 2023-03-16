@@ -17,7 +17,7 @@
  * @link http://www.pocketmine.net/
  * 
  *
-*/
+ */
 
 namespace pocketmine\utils;
 
@@ -61,7 +61,7 @@ class BinaryStream extends stdClass
 	public function setBuffer($buffer = null, $offset = 0)
 	{
 		$this->buffer = $buffer;
-		$this->offset = (int)$offset;
+		$this->offset = (int) $offset;
 	}
 
 	public function getLong()
@@ -270,7 +270,7 @@ class BinaryStream extends stdClass
 
 	public function putByte($v)
 	{
-		$this->buffer .= chr($v);
+		$this->buffer .= chr((int) $v);
 	}
 
 	public function putLShort($v)
@@ -285,6 +285,9 @@ class BinaryStream extends stdClass
 
 	public function putString($v)
 	{
+		if ($v == null) {
+			return;
+		}
 		$this->putShort(strlen($v));
 		$this->put($v);
 	}

@@ -17,7 +17,7 @@
  * @link http://www.pocketmine.net/
  *
  *
-*/
+ */
 
 declare(strict_types=1);
 
@@ -46,7 +46,7 @@ interface ChunkManager
 	 * @param int $z
 	 * @param int $id 0-255
 	 */
-	public function setBlockIdAt(int $x, int $y, int $z, int $id);
+	public function setBlockIdAt(float|int $x, float|int $y, float|int $z, int $id);
 
 	/**
 	 * Gets the raw block metadata

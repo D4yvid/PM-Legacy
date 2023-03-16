@@ -17,7 +17,7 @@
  * @link http://www.pocketmine.net/
  *
  *
-*/
+ */
 
 namespace pocketmine\level\format;
 
@@ -56,11 +56,13 @@ interface FullChunk
 	 * @return int
 	 */
 	public function getX();
+	public function getFloorX();
 
 	/**
 	 * @return int
 	 */
 	public function getZ();
+	public function getFloorZ();
 
 	public function setX($x);
 

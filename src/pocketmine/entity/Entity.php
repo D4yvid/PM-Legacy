@@ -17,7 +17,7 @@
  * @link http://www.pocketmine.net/
  *
  *
-*/
+ */
 
 /**
  * All the entity classes
@@ -345,14 +345,14 @@ abstract class Entity extends Location implements Metadatable
 
 	protected function checkChunks()
 	{
-		if ($this->chunk === null or ($this->chunk->getX() !== ($this->x >> 4) or $this->chunk->getZ() !== ($this->z >> 4))) {
+		if ($this->chunk === null or ($this->chunk->getFloorX() !== ($this->getFloorX() >> 4) or $this->chunk->getFloorX() !== ($this->getFloorZ() >> 4))) {
 			if ($this->chunk !== null) {
 				$this->chunk->removeEntity($this);
 			}
-			$this->chunk = $this->level->getChunk($this->x >> 4, $this->z >> 4, true);
+			$this->chunk = $this->level->getChunk($this->getFloorX() >> 4, $this->getFloorZ() >> 4, true);
 
 			if (!$this->justCreated) {
-				$newChunk = $this->level->getChunkPlayers($this->x >> 4, $this->z >> 4);
+				$newChunk = $this->level->getChunkPlayers($this->getFloorX() >> 4, $this->getFloorZ() >> 4);
 				foreach ($this->hasSpawned as $player) {
 					if (!isset($newChunk[$player->getLoaderId()])) {
 						$this->despawnFrom($player);
@@ -625,7 +625,7 @@ abstract class Entity extends Location implements Metadatable
 	 */
 	public function setHealth($amount)
 	{
-		$amount = (int)$amount;
+		$amount = (int) $amount;
 		if ($amount === $this->health) {
 			return;
 		}
@@ -635,7 +635,7 @@ abstract class Entity extends Location implements Metadatable
 				$this->kill();
 			}
 		} elseif ($amount <= $this->getMaxHealth() or $amount < $this->health) {
-			$this->health = (int)$amount;
+			$this->health = (int) $amount;
 		} else {
 			$this->health = $this->getMaxHealth();
 		}
@@ -691,12 +691,12 @@ abstract class Entity extends Location implements Metadatable
 	 */
 	public function getDataFlag($propertyId, $id)
 	{
-		return (((int)$this->getDataProperty($propertyId)) & (1 << $id)) > 0;
+		return (((int) $this->getDataProperty($propertyId)) & (1 << $id)) > 0;
 	}
 
 	public function setSneaking($value = true)
 	{
-		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SNEAKING, (bool)$value);
+		$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SNEAKING, (bool) $value);
 	}
 
 	/**
@@ -708,7 +708,7 @@ abstract class Entity extends Location implements Metadatable
 	public function setDataFlag($propertyId, $id, $value = true, $type = self::DATA_TYPE_BYTE)
 	{
 		if ($this->getDataFlag($propertyId, $id) !== $value) {
-			$flags = (int)$this->getDataProperty($propertyId);
+			$flags = (int) $this->getDataProperty($propertyId);
 			$flags ^= 1 << $id;
 			$this->setDataProperty($propertyId, $type, $flags);
 		}
@@ -717,7 +717,7 @@ abstract class Entity extends Location implements Metadatable
 	public function setSprinting($value = true)
 	{
 		if ($value !== $this->isSprinting()) {
-			$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SPRINTING, (bool)$value);
+			$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_SPRINTING, (bool) $value);
 			$attr = $this->attributeMap->getAttribute(Attribute::MOVEMENT_SPEED);
 			$attr->setValue($value ? ($attr->getValue() * 1.3) : ($attr->getValue() / 1.3));
 		}
@@ -888,7 +888,7 @@ abstract class Entity extends Location implements Metadatable
 	 */
 	public function setMaxHealth($amount)
 	{
-		$this->maxHealth = (int)$amount;
+		$this->maxHealth = (int) $amount;
 	}
 
 	public function canCollideWith(Entity $entity)
@@ -1120,7 +1120,8 @@ abstract class Entity extends Location implements Metadatable
 	 */
 	public function attack($damage, EntityDamageEvent $source)
 	{
-		if ($this->hasEffect(Effect::FIRE_RESISTANCE) and (
+		if (
+			$this->hasEffect(Effect::FIRE_RESISTANCE) and (
 				$source->getCause() === EntityDamageEvent::CAUSE_FIRE
 				or $source->getCause() === EntityDamageEvent::CAUSE_FIRE_TICK
 				or $source->getCause() === EntityDamageEvent::CAUSE_LAVA
@@ -1329,13 +1330,13 @@ abstract class Entity extends Location implements Metadatable
 
 			/*
 			if($this->isColliding){ // With cobweb?
-				$this->isColliding = false;
-				$dx *= 0.25;
-				$dy *= 0.05;
-				$dz *= 0.25;
-				$this->motionX = 0;
-				$this->motionY = 0;
-				$this->motionZ = 0;
+			$this->isColliding = false;
+			$dx *= 0.25;
+			$dy *= 0.05;
+			$dz *= 0.25;
+			$this->motionX = 0;
+			$this->motionY = 0;
+			$this->motionZ = 0;
 			}
 			*/
 
@@ -1346,29 +1347,26 @@ abstract class Entity extends Location implements Metadatable
 			$axisalignedbb = clone $this->boundingBox;
 
 			/*$sneakFlag = $this->onGround and $this instanceof Player;
-
 			if($sneakFlag){
-				for($mov = 0.05; $dx != 0.0 and count($this->level->getCollisionCubes($this, $this->boundingBox->getOffsetBoundingBox($dx, -1, 0))) === 0; $movX = $dx){
-					if($dx < $mov and $dx >= -$mov){
-						$dx = 0;
-					}elseif($dx > 0){
-						$dx -= $mov;
-					}else{
-						$dx += $mov;
-					}
-				}
-
-				for(; $dz != 0.0 and count($this->level->getCollisionCubes($this, $this->boundingBox->getOffsetBoundingBox(0, -1, $dz))) === 0; $movZ = $dz){
-					if($dz < $mov and $dz >= -$mov){
-						$dz = 0;
-					}elseif($dz > 0){
-						$dz -= $mov;
-					}else{
-						$dz += $mov;
-					}
-				}
-
-			 // TODO: big messy loop
+			for($mov = 0.05; $dx != 0.0 and count($this->level->getCollisionCubes($this, $this->boundingBox->getOffsetBoundingBox($dx, -1, 0))) === 0; $movX = $dx){
+			if($dx < $mov and $dx >= -$mov){
+			$dx = 0;
+			}elseif($dx > 0){
+			$dx -= $mov;
+			}else{
+			$dx += $mov;
+			}
+			}
+			for(; $dz != 0.0 and count($this->level->getCollisionCubes($this, $this->boundingBox->getOffsetBoundingBox(0, -1, $dz))) === 0; $movZ = $dz){
+			if($dz < $mov and $dz >= -$mov){
+			$dz = 0;
+			}elseif($dz > 0){
+			$dz -= $mov;
+			}else{
+			$dz += $mov;
+			}
+			}
+			// TODO: big messy loop
 			}*/
 
 			$list = $this->level->getCollisionCubes($this, $this->level->getTickRate() > 1 ? $this->boundingBox->getOffsetBoundingBox($dx, $dy, $dz) : $this->boundingBox->addCoord($dx, $dy, $dz), false);
