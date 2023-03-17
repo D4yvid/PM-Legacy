@@ -26,7 +26,7 @@ use pocketmine\command\defaults\TimingsCommand;
 use pocketmine\command\PluginCommand;
 use pocketmine\command\SimpleCommandMap;
 use pocketmine\event\Event;
-use pocketmine\event\EventPriority;
+use pocketmine\event\EventHandler;
 use pocketmine\event\HandlerList;
 use pocketmine\event\Listener;
 use pocketmine\event\Timings;
@@ -37,6 +37,7 @@ use pocketmine\Server;
 use pocketmine\utils\PluginException;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionNamedType;
 use RegexIterator;
 use Throwable;
 use WeakRef;
@@ -146,15 +147,19 @@ class PluginManager
 			} else {
 				$loaders = $this->fileAssociations;
 			}
+
 			foreach ($loaders as $loader) {
 				foreach (new RegexIterator(new DirectoryIterator($directory), $loader->getPluginFilters()) as $file) {
 					if ($file === "." or $file === "..") {
 						continue;
 					}
+
 					$file = $directory . $file;
+
 					try {
 						$description = $loader->getPluginDescription($file);
 						if ($description instanceof PluginDescription) {
+
 							$name = $description->getName();
 							if (stripos($name, "pocketmine") !== false or stripos($name, "minecraft") !== false or stripos($name, "mojang") !== false) {
 								$this->server->getLogger()->error($this->server->getLanguage()->translateString("pocketmine.plugin.loadError", [$name, "%pocketmine.plugin.restrictedName"]));
@@ -725,25 +730,30 @@ class PluginManager
 		$reflection = new ReflectionClass(get_class($listener));
 		foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
 			if (!$method->isStatic()) {
-				$priority = EventPriority::NORMAL;
-				$ignoreCancelled = false;
-				if (preg_match("/^[\t ]*\\* @priority[\t ]{1,}([a-zA-Z]{1,})/m", (string) $method->getDocComment(), $matches) > 0) {
-					$matches[1] = strtoupper($matches[1]);
-					if (defined(EventPriority::class . "::" . $matches[1])) {
-						$priority = constant(EventPriority::class . "::" . $matches[1]);
-					}
-				}
-				if (preg_match("/^[\t ]*\\* @ignoreCancelled[\t ]{1,}([a-zA-Z]{1,})/m", (string) $method->getDocComment(), $matches) > 0) {
-					$matches[1] = strtolower($matches[1]);
-					if ($matches[1] === "false") {
-						$ignoreCancelled = false;
-					} elseif ($matches[1] === "true") {
-						$ignoreCancelled = true;
+				/** @var EventHandler */
+				$handlerInfo = null;
+
+				foreach ($method->getAttributes() as $attr) {
+					if ($attr == null)
+						continue;
+
+					if ($attr->getName() == EventHandler::class) {
+						$handlerInfo = $attr->newInstance();
+						break;
 					}
 				}
 
+				if ($handlerInfo == null)
+					continue;
+
+				$ignoreCancelled = $handlerInfo->ignoreCancelled;
+				$priority = $handlerInfo->priority;
+
 				$parameters = $method->getParameters();
-				if (count($parameters) === 1 and $parameters[0]->getType() instanceof ReflectionClass and is_subclass_of($parameters[0]->getClass()->getName(), Event::class)) {
+				if (count($parameters) === 1 &&
+					$parameters[0]->getType() instanceof ReflectionNamedType &&
+					is_subclass_of($parameters[0]->getType()->getName(), Event::class)
+				) {
 					$class = $parameters[0]->getType()->getName();
 					$reflection = new ReflectionClass($class);
 					if (str_contains((string) $reflection->getDocComment(), "@deprecated") and $this->server->getProperty("settings.deprecated-verbose", true)) {
