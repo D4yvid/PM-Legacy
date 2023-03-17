@@ -23,7 +23,6 @@
 
 namespace pocketmine;
 
-
 use InvalidStateException;
 use pocketmine\block\Air;
 use pocketmine\block\Block;
@@ -141,22 +140,17 @@ use pocketmine\utils\UUID;
 use raklib\Binary;
 use SplObjectStorage;
 
-
-
-
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
  */
 class Player extends Human implements CommandSender, InventoryHolder, ChunkLoader, IPlayer
 {
 
-
 	const SURVIVAL = 0;
 	const CREATIVE = 1;
 	const ADVENTURE = 2;
 	const SPECTATOR = 3;
 	const VIEW = Player::SPECTATOR;
-
 
 	const SURVIVAL_SLOTS = 36;
 	const CREATIVE_SLOTS = 112;
@@ -171,7 +165,7 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
 	public $blocked = false;
 	public $achievements = [];
 	public $lastCorrect;
-public $craftingType = 0;
+	public $craftingType = 0;
 	public $creationTime = 0;
 	public $usedChunks = [];
 	/** @var SourceInterface */
@@ -182,7 +176,7 @@ public $craftingType = 0;
 	/** @var Inventory[] */
 	protected $windowIndex = [];
 	protected $messageCounter = 2;
-		protected $sendIndex = 0; // 0 = 2x2 crafting, 1 = 3x3 crafting, 2 = stonecutter
+	protected $sendIndex = 0; // 0 = 2x2 crafting, 1 = 3x3 crafting, 2 = stonecutter
 	/** @var SimpleTransactionGroup */
 	protected $currentTransaction = null;
 	protected $isCrafting = false;
@@ -337,7 +331,7 @@ public $craftingType = 0;
 	 */
 	public function setRemoveFormat($remove = true)
 	{
-		$this->removeFormat = (bool)$remove;
+		$this->removeFormat = (bool) $remove;
 	}
 
 
@@ -649,9 +643,9 @@ public $craftingType = 0;
 		}
 		$this->spawnPosition = new Position($pos->x, $pos->y, $pos->z, $level);
 		$pk = new SetSpawnPositionPacket();
-		$pk->x = (int)$this->spawnPosition->x;
-		$pk->y = (int)$this->spawnPosition->y;
-		$pk->z = (int)$this->spawnPosition->z;
+		$pk->x = (int) $this->spawnPosition->x;
+		$pk->y = (int) $this->spawnPosition->y;
+		$pk->z = (int) $this->spawnPosition->z;
 		$this->dataPacket($pk);
 	}
 
@@ -853,7 +847,7 @@ public $craftingType = 0;
 					if ($to->distanceSquared($ev->getTo()) > 0.01) { // If plugins modify the destination
 						$this->teleport($ev->getTo());
 					} else {
-						$this->level->addEntityMovement($this->x >> 4, $this->z >> 4, $this->getId(), $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
+						$this->level->addEntityMovement($this->getFloorX() >> 4, $this->getFloorZ() >> 4, $this->getId(), $this->x, $this->y + $this->getEyeHeight(), $this->z, $this->yaw, $this->pitch, $this->yaw);
 					}
 				}
 			}
@@ -981,10 +975,8 @@ public $craftingType = 0;
 	 */
 	public final function close($message = "", $reason = "generic reason", $notify = true)
 	{
-
-
 		if ($this->connected and !$this->closed) {
-			if ($notify and strlen((string)$reason) > 0) {
+			if ($notify and strlen((string) $reason) > 0) {
 				$pk = new DisconnectPacket;
 				$pk->message = $reason;
 				$this->directDataPacket($pk);
@@ -1013,7 +1005,7 @@ public $craftingType = 0;
 			}
 
 
-			foreach ($this->usedChunks as $index => $d) {
+			foreach ($this->usedChunks as $index => $_) {
 				Level::getXZ($index, $chunkX, $chunkZ);
 				$this->level->unregisterChunkLoader($this, $chunkX, $chunkZ);
 				unset($this->usedChunks[$index]);
@@ -1130,9 +1122,9 @@ public $craftingType = 0;
 			$this->namedtag->Level = new StringTag("Level", $this->level->getName());
 			if ($this->spawnPosition instanceof Position and $this->spawnPosition->getLevel() instanceof Level) {
 				$this->namedtag["SpawnLevel"] = $this->spawnPosition->getLevel()->getName();
-				$this->namedtag["SpawnX"] = (int)$this->spawnPosition->x;
-				$this->namedtag["SpawnY"] = (int)$this->spawnPosition->y;
-				$this->namedtag["SpawnZ"] = (int)$this->spawnPosition->z;
+				$this->namedtag["SpawnX"] = (int) $this->spawnPosition->x;
+				$this->namedtag["SpawnY"] = (int) $this->spawnPosition->y;
+				$this->namedtag["SpawnZ"] = (int) $this->spawnPosition->z;
 			}
 
 
@@ -1201,8 +1193,8 @@ public $craftingType = 0;
 	protected function checkTeleportPosition()
 	{
 		if ($this->teleportPosition !== null) {
-			$chunkX = $this->teleportPosition->x >> 4;
-			$chunkZ = $this->teleportPosition->z >> 4;
+			$chunkX = $this->teleportPosition->getFloorX() >> 4;
+			$chunkZ = $this->teleportPosition->getFloorZ() >> 4;
 
 
 			for ($X = -1; $X <= 1; ++$X) {
@@ -1622,7 +1614,7 @@ public $craftingType = 0;
 
 	public function setAllowFlight($value)
 	{
-		$this->allowFlight = (bool)$value;
+		$this->allowFlight = (bool) $value;
 		$this->sendSettings();
 	}
 
@@ -1909,9 +1901,8 @@ public $craftingType = 0;
 		$lastChunk = $this->usedChunks;
 
 
-		$centerX = $this->x >> 4;
-		$centerZ = $this->z >> 4;
-
+		$centerX = $this->getFloorX() >> 4;
+		$centerZ = $this->getFloorZ() >> 4;
 
 		$layer = 1;
 		$leg = 0;
@@ -1995,13 +1986,15 @@ public $craftingType = 0;
 			}
 
 
+			/** @var int */
 			$X = null;
+
+			/** @var int */
 			$Z = null;
+			
 			Level::getXZ($index, $X, $Z);
 
-
 			++$count;
-
 
 			$this->usedChunks[$index] = false;
 			$this->level->registerChunkLoader($this, $X, $Z, false);
@@ -2268,8 +2261,8 @@ public $craftingType = 0;
 				if ($this->teleportPosition !== null or ($this->forceMovement instanceof Vector3 and (($dist = $newPos->distanceSquared($this->forceMovement)) > 0.1 or $revert))) {
 					$this->sendPosition($this->teleportPosition === null ? $this->forceMovement : $this->teleportPosition, $packet->yaw, $packet->pitch);
 				} else {
-					$packet->yaw %= 360;
-					$packet->pitch %= 360;
+					$packet->yaw = floor((int) $packet->yaw % 360);
+					$packet->pitch = floor((int) $packet->pitch % 360);
 
 
 					if ($packet->yaw < 0) {
@@ -3471,7 +3464,7 @@ public $craftingType = 0;
 		}
 
 
-		$this->allowFlight = (bool)($this->gamemode & 0x01);
+		$this->allowFlight = (bool) ($this->gamemode & 0x01);
 
 
 		if (($level = $this->server->getLevelByName($nbt["Level"])) === null) {
@@ -3508,7 +3501,7 @@ public $craftingType = 0;
 		}
 
 
-		parent::__construct($this->level->getChunk($nbt["Pos"][0] >> 4, $nbt["Pos"][2] >> 4, true), $nbt);
+		parent::__construct($this->level->getChunk((int) $nbt["Pos"][0] >> 4, (int) $nbt["Pos"][2] >> 4, true), $nbt);
 		$this->loggedIn = true;
 		$this->server->addOnlinePlayer($this);
 
@@ -3548,9 +3541,9 @@ public $craftingType = 0;
 		$pk->x = $this->x;
 		$pk->y = $this->y;
 		$pk->z = $this->z;
-		$pk->spawnX = (int)$spawnPosition->x;
-		$pk->spawnY = (int)$spawnPosition->y;
-		$pk->spawnZ = (int)$spawnPosition->z;
+		$pk->spawnX = (int) $spawnPosition->x;
+		$pk->spawnY = (int) $spawnPosition->y;
+		$pk->spawnZ = (int) $spawnPosition->z;
 		$pk->generator = 1; // 0 old, 1 infinite, 2 flat
 		$pk->gamemode = $this->gamemode & 0x01;
 		$pk->eid = 0; // Always use EntityID as zero for the actual player
@@ -3564,9 +3557,9 @@ public $craftingType = 0;
 
 
 		$pk = new SetSpawnPositionPacket();
-		$pk->x = (int)$spawnPosition->x;
-		$pk->y = (int)$spawnPosition->y;
-		$pk->z = (int)$spawnPosition->z;
+		$pk->x = (int) $spawnPosition->x;
+		$pk->y = (int) $spawnPosition->y;
+		$pk->z = (int) $spawnPosition->z;
 		$this->dataPacket($pk);
 
 
@@ -3644,8 +3637,8 @@ public $craftingType = 0;
 		$this->port = $port;
 		$this->clientID = $clientID;
 		$this->loaderId = Level::generateChunkLoaderId($this);
-		$this->chunksPerTick = (int)$this->server->getProperty("chunk-sending.per-tick", 4);
-		$this->spawnThreshold = (int)$this->server->getProperty("chunk-sending.spawn-threshold", 56);
+		$this->chunksPerTick = (int) $this->server->getProperty("chunk-sending.per-tick", 4);
+		$this->spawnThreshold = (int) $this->server->getProperty("chunk-sending.spawn-threshold", 56);
 		$this->spawnPosition = null;
 		$this->gamemode = $this->server->getGamemode();
 		$this->setLevel($this->server->getDefaultLevel());
@@ -3685,7 +3678,7 @@ public $craftingType = 0;
 		}
 
 
-		$this->server->getPluginManager()->callEvent($ev = new PlayerGameModeChangeEvent($this, (int)$gm));
+		$this->server->getPluginManager()->callEvent($ev = new PlayerGameModeChangeEvent($this, (int) $gm));
 		if ($ev->isCancelled()) {
 			return false;
 		}
@@ -3953,7 +3946,7 @@ public $craftingType = 0;
 		if ($forceId === null) {
 			$this->windowCnt = $cnt = max(2, ++$this->windowCnt % 99);
 		} else {
-			$cnt = (int)$forceId;
+			$cnt = (int) $forceId;
 		}
 		$this->windowIndex[$cnt] = $inventory;
 		$this->windows->attach($inventory, $cnt);
@@ -3994,7 +3987,7 @@ public $craftingType = 0;
 
 	public function onChunkChanged(FullChunk $chunk)
 	{
-		$this->loadQueue[Level::chunkHash($chunk->getX(), $chunk->getZ())] = abs(($this->x >> 4) - $chunk->getX()) + abs(($this->z >> 4) - $chunk->getZ());
+		$this->loadQueue[Level::chunkHash($chunk->getFloorX(), $chunk->getFloorZ())] = abs(($this->getFloorX() >> 4) - $chunk->getFloorX()) + abs(($this->getFloorZ() >> 4) - $chunk->getFloorZ());
 	}
 
 
@@ -4102,15 +4095,15 @@ public $craftingType = 0;
 
 	protected function checkChunks()
 	{
-		if ($this->chunk === null or ($this->chunk->getX() !== ($this->x >> 4) or $this->chunk->getZ() !== ($this->z >> 4))) {
+		if ($this->chunk === null or ($this->chunk->getFloorX() !== ($this->getFloorX() >> 4) or $this->chunk->getFloorZ() !== ($this->getFloorZ() >> 4))) {
 			if ($this->chunk !== null) {
 				$this->chunk->removeEntity($this);
 			}
-			$this->chunk = $this->level->getChunk($this->x >> 4, $this->z >> 4, true);
+			$this->chunk = $this->level->getChunk($this->getFloorX() >> 4, $this->getFloorZ() >> 4, true);
 
 
 			if (!$this->justCreated) {
-				$newChunk = $this->level->getChunkPlayers($this->x >> 4, $this->z >> 4);
+				$newChunk = $this->level->getChunkPlayers($this->getFloorX() >> 4, $this->getFloorZ() >> 4);
 				unset($newChunk[$this->getLoaderId()]);
 
 

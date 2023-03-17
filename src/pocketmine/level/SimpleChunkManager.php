@@ -17,7 +17,7 @@
  * @link http://www.pocketmine.net/
  *
  *
-*/
+ */
 
 declare(strict_types=1);
 
@@ -69,14 +69,14 @@ class SimpleChunkManager implements ChunkManager
 	/**
 	 * Sets the raw block id.
 	 *
-	 * @param int $x
-	 * @param int $y
-	 * @param int $z
+	 * @param float|int $x
+	 * @param float|int $y
+	 * @param float|int $z
 	 * @param int $id 0-255
 	 */
-	public function setBlockIdAt(int $x, int $y, int $z, int $id)
+	public function setBlockIdAt(float|int $x, float|int $y, float|int $z, int $id)
 	{
-		if ($chunk = $this->getChunk($x >> 4, $z >> 4)) {
+		if ($chunk = $this->getChunk((int) $x >> 4, (int) $z >> 4)) {
 			$chunk->setBlockId($x & 0xf, $y & 0x7f, $z & 0xf, $id);
 		}
 	}

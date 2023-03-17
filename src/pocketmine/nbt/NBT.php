@@ -17,7 +17,7 @@
  * @link http://www.pocketmine.net/
  * 
  *
-*/
+ */
 
 /**
  * Named Binary Tag handling classes
@@ -96,7 +96,7 @@ class NBT
 		]);
 
 		if ($slot !== null) {
-			$tag->Slot = new ByteTag("Slot", (int)$slot);
+			$tag->Slot = new ByteTag("Slot", (int) $slot);
 		}
 
 		if ($item->hasCompoundTag()) {
@@ -360,7 +360,7 @@ class NBT
 				$last = null;
 			}
 
-			if ($last !== "f" and $last !== "d" and ((string)((int)$part)) === $part) {
+			if ($last !== "f" and $last !== "d" and ((string) ((int) $part)) === $part) {
 				if ($last === "b") {
 					$type = self::TAG_Byte;
 				} elseif ($last === "s") {
@@ -370,7 +370,7 @@ class NBT
 				} else {
 					$type = self::TAG_Int;
 				}
-				$value = (int)$part;
+				$value = (int) $part;
 			} elseif (is_numeric($part)) {
 				if ($last === "f" or $last === "d" or strpos($part, ".") !== false) {
 					if ($last === "f") {
@@ -380,7 +380,7 @@ class NBT
 					} else {
 						$type = self::TAG_Float;
 					}
-					$value = (float)$part;
+					$value = (float) $part;
 				} else {
 					if ($last === "l") {
 						$type = self::TAG_Long;
@@ -622,8 +622,10 @@ class NBT
 
 	public function putString($v)
 	{
-		$this->putShort(strlen($v));
-		$this->buffer .= $v;
+		if ($v !== null) {
+			$this->putShort(strlen($v));
+			$this->buffer .= $v;
+		}
 	}
 
 	public function putShort($v)

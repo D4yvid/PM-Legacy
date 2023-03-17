@@ -17,7 +17,7 @@
  * @link http://www.pocketmine.net/
  *
  *
-*/
+ */
 
 namespace pocketmine\utils;
 
@@ -26,8 +26,8 @@ use SplPriorityQueue;
 class ReversePriorityQueue extends SplPriorityQueue
 {
 
-	public function compare($priority1, $priority2)
+	public function compare(mixed $priority1, mixed $priority2): int
 	{
-		return (int)-($priority1 - $priority2);
+		return (int) -($priority1 - $priority2);
 	}
 }

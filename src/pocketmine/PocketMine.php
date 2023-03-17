@@ -61,9 +61,14 @@ namespace {
 	}
 
 	define("DIR_SEP", DIRECTORY_SEPARATOR);
+	define("DEBUG", 1);
 }
 
 namespace pocketmine {
+
+	if (!defined("DEBUG")) {
+		error_reporting(0);
+	}
 
 	use Exception;
 	use Phar;
@@ -73,9 +78,9 @@ namespace pocketmine {
 	use pocketmine\utils\Utils;
 	use pocketmine\wizard\Installer;
 
-	const VERSION = "1.6dev";
+	const VERSION = "2.dev";
 	const API_VERSION = "2.0.0";
-	const CODENAME = "Unleashed";
+	const CODENAME = "Moon Light";
 	const MINECRAFT_VERSION = "v0.15.10.0 alpha";
 	const MINECRAFT_VERSION_NETWORK = "0.15.10.0";
 
@@ -123,7 +128,7 @@ namespace pocketmine {
 		}
 
 		if (version_compare($pthreads_version, "3.1.5") < 0) {
-			$missingExtensions[] = "pthreads >= 3.1.5 is required, while you have $pthreads_version.";
+			$missingExtensions[] = "pthreads >= 3.1.5";
 			++$errors;
 		}
 
@@ -176,7 +181,6 @@ namespace pocketmine {
 	 * This is the only non-class based file on this project.
 	 * Enjoy it as much as I did writing it. I don't want to do it again.
 	 */
-
 
 	checkPHPBinary();
 
@@ -411,11 +415,11 @@ namespace pocketmine {
 	{
 		switch (Utils::getOS()) {
 			case "win":
-				exec("taskkill.exe /F /PID " . ((int)$pid) . " > NUL");
+				exec("taskkill.exe /F /PID " . ((int) $pid) . " > NUL");
 				break;
 
 			default:
-				exec("kill -s KILL " . ((int)$pid) . " > /dev/null 2>&1");
+				exec("kill -s KILL " . ((int) $pid) . " > /dev/null 2>&1");
 		}
 	}
 
@@ -433,7 +437,7 @@ namespace pocketmine {
 		ob_end_clean();
 
 		if (count($ret) >= 1 and preg_match('/^.* refcount\\(([0-9]+)\\)\\{$/', trim($ret[0]), $m) > 0) {
-			return ((int)$m[1]) - ($includeCurrent ? 3 : 4); //$value + zval call + extra call
+			return ((int) $m[1]) - ($includeCurrent ? 3 : 4); //$value + zval call + extra call
 		}
 		return -1;
 	}
@@ -447,7 +451,7 @@ namespace pocketmine {
 
 		$messages = [];
 		$j = 0;
-		for ($i = (int)$start; isset($trace[$i]); ++$i, ++$j) {
+		for ($i = (int) $start; isset($trace[$i]); ++$i, ++$j) {
 			$params = "";
 			if (isset($trace[$i]["args"]) or isset($trace[$i]["params"])) {
 				if (isset($trace[$i]["args"])) {

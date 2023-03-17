@@ -1,0 +1,67 @@
+on:
+  - push
+
+jobs:
+  build_job:
+    runs-on: ubuntu-18.04
+    name: Build on ${{ matrix.distro }} ${{ matrix.arch }}
+
+    strategy:
+      matrix:
+        include:
+          - arch: aarch64
+            distro: ubuntu18.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: uraimo/run-on-arch-action@v2
+        name: Build artifact
+        id: build
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+
+          githubToken: ${{ github.token }}
+
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+
+          dockerRunArgs: |
+            --volume "${PWD}/artifacts:/artifacts"
+
+          env: |
+            artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
+
+          shell: /bin/sh
+
+          install: |
+            case "${{ matrix.distro }}" in
+              ubuntu*|jessie|stretch|buster|bullseye)
+                apt-get update -q -y
+                apt-get install -q -y make autoconf automake libtool libtool-bin m4 wget libc-bin gzip bzip2 bison g++ git re2c
+
+          run: |
+            cp $(which git) "/artifacts/${artifact_name}"
+            echo "Produced artifact at /artifacts/${artifact_name}"
+
+      - name: Prepare compile.sh download cache
+        id: download-cache
+        uses: actions/cache@v3
+        with:
+          path: ./download_cache
+          key: compile-sh-cache-${{ hashFiles('./compile.sh') }}
+          restore-keys: compile-sh-cache-
+
+      - name: Compile PHP
+        run: |
+          set -ex
+          trap "exit 1" ERR
+          ./compile.sh -t linux64 -j 4 -f -g -P ${{ matrix.pm-version-major }} -c ./download_cache
+
+      - name: Create tarball
+        run: tar -czf ./PHP-Linux-x86_64-PM${{ matrix.pm-version-major }}.tar.gz bin
+
+      - name: Show the artifact
+        # Items placed in /artifacts in the container will be in
+        # ${PWD}/artifacts on the host.
+        run: |
+          ls -al "${PWD}/artifacts"

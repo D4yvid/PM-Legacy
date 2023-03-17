@@ -64,6 +64,7 @@ class SessionManager
 	protected $lastMeasure;
 	protected $block = [];
 	protected $ipSec = [];
+	private $serverId;
 
 	public function __construct(RakLibServer $server, UDPServerSocket $socket)
 	{
@@ -254,7 +255,9 @@ class SessionManager
 
 	public function receiveStream()
 	{
-		if (strlen($packet = $this->server->readMainToThreadPacket()) > 0) {
+		$packet = $this->server->readMainToThreadPacket();
+
+		if ($packet != null && strlen($packet) > 0) {
 			$id = ord($packet[0]);
 			$offset = 1;
 			if ($id === RakLib::PACKET_ENCAPSULATED) {

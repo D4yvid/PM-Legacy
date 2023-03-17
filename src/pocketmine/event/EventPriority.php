@@ -30,35 +30,26 @@ namespace pocketmine\event;
  *
  * MONITOR events should not change the event outcome or contents
  */
-abstract class EventPriority
+enum EventPriority
 {
-	/**
-	 * Event call is of very low importance and should be ran first, to allow
-	 * other plugins to further customise the outcome
-	 */
-	const LOWEST = 5;
-	/**
-	 * Event call is of low importance
-	 */
-	const LOW = 4;
-	/**
-	 * Event call is neither important or unimportant, and may be ran normally
-	 */
-	const NORMAL = 3;
-	/**
-	 * Event call is of high importance
-	 */
-	const HIGH = 2;
-	/**
-	 * Event call is critical and must have the final say in what happens
-	 * to the event
-	 */
-	const HIGHEST = 1;
-	/**
-	 * Event is listened to purely for monitoring the outcome of an event.
-	 *
-	 * No modifications to the event should be made under this priority
-	 */
-	const MONITOR = 0;
+
+	case LOWEST;
+	case LOW;
+	case NORMAL;
+	case HIGH;
+	case HIGHEST;
+	case MONITOR;
+
+	public function value(): int
+	{
+		return match($this) {
+			EventPriority::LOWEST  => 5,
+			EventPriority::LOW     => 4,
+			EventPriority::NORMAL  => 3,
+			EventPriority::HIGH    => 2,
+			EventPriority::HIGHEST => 1,
+			EventPriority::MONITOR => 0
+		};
+	}
 
 }

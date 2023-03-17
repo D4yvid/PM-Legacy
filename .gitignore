@@ -1,7 +1,7 @@
 players/*
 worlds/*
 plugins/*
-bin/*
+bin/
 timings/*
 Server/
 *.log
@@ -28,3 +28,5 @@ Desktop.ini
 # Sphinx-doc
 /docs/build/
 !/docs/requirements.txt
+
+/vendor/
