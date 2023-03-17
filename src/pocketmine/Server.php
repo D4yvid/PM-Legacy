@@ -17,7 +17,7 @@
  * @link http://www.pocketmine.net/
  *
  *
-*/
+ */
 
 /**
  * PocketMine-MP is the Minecraft: PE multiplayer server software
@@ -102,6 +102,7 @@ use pocketmine\network\rcon\RCON;
 use pocketmine\network\upnp\UPnP;
 use pocketmine\permission\BanList;
 use pocketmine\permission\DefaultPermissions;
+use pocketmine\plugin\FolderPluginLoader;
 use pocketmine\plugin\PharPluginLoader;
 use pocketmine\plugin\Plugin;
 use pocketmine\plugin\PluginLoadOrder;
@@ -139,120 +140,90 @@ class Server
 	const BROADCAST_CHANNEL_ADMINISTRATIVE = "pocketmine.broadcast.admin";
 	const BROADCAST_CHANNEL_USERS = "pocketmine.broadcast.user";
 
-	/** @var Server */
-	private static $instance = null;
+	private static ?Server $instance = null;
 
-	/** @var Threaded */
-	private static $sleeper = null;
-	public $networkCompressionLevel = 7;
-	/** @var BanList */
-	private $banByName = null;
-	/** @var BanList */
-	private $banByIP = null;
-	/** @var Config */
-	private $operators = null;
-	/** @var Config */
-	private $whitelist = null;
-	/** @var bool */
-	private $isRunning = true;
-	private $hasStopped = false;
-	/** @var PluginManager */
-	private $pluginManager = null;
-	private $profilingTickRate = 20;
-	/** @var AutoUpdater */
-	private $updater = null;
-	/** @var ServerScheduler */
-	private $scheduler = null;
-	/**
-	 * Counts the ticks since the server start
-	 *
-	 * @var int
-	 */
-	private $tickCounter;
-	private $nextTick = 0;
-	private $tickAverage = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
-	private $useAverage = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-	private $maxTick = 20;
-	private $maxUse = 0;
-	private $sendUsageTicker = 0;
-	private $dispatchSignals = false;
-	/** @var AttachableThreadedLogger */
-	private $logger;
-	/** @var MemoryManager */
-	private $memoryManager;
-	/** @var CommandReader */
-	private $console = null;
+	private static ?Threaded $sleeper = null;
+	public int $networkCompressionLevel = 7;
+	private ?BanList $banByName = null;
+	private ?BanList $banByIP = null;
+	private ?Config $operators = null;
+	private ?Config $whitelist = null;
+	private bool $isRunning = true;
+	private bool $hasStopped = false;
+	private ?PluginManager $pluginManager = null;
+	private int $profilingTickRate = 20;
+	private ?AutoUpdater $updater = null;
+	private ?ServerScheduler $scheduler = null;
+
+	private int $tickCounter;
+	private float $nextTick = 0;
+	private array $tickAverage = [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
+	private array $useAverage = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	private float $maxTick = 20;
+	private float $maxUse = 0;
+	private int $sendUsageTicker = 0;
+	private bool $dispatchSignals = false;
+
+	private MemoryManager $memoryManager;
+
+	private ?CommandReader $console = null;
 	private $consoleThreaded;
-	/** @var SimpleCommandMap */
-	private $commandMap = null;
-	/** @var CraftingManager */
-	private $craftingManager;
-	/** @var ConsoleCommandSender */
-	private $consoleSender;
-	/** @var int */
-	private $maxPlayers;
-	/** @var bool */
-	private $autoSave;
-	/** @var RCON */
-	private $rcon;
-	/** @var EntityMetadataStore */
-	private $entityMetadata;
-	/** @var PlayerMetadataStore */
-	private $playerMetadata;
-	/** @var LevelMetadataStore */
-	private $levelMetadata;
-	/** @var Network */
-	private $network;
-	private $networkCompressionAsync = true;
-	private $autoTickRate = true;
-	private $autoTickRateLimit = 20;
-	private $alwaysTickPlayers = false;
-	private $baseTickRate = 1;
 
-	private $autoSaveTicker = 0;
-	private $autoSaveTicks = 6000;
+	private ?SimpleCommandMap $commandMap = null;
 
-	/** @var BaseLang */
-	private $baseLang;
+	private CraftingManager $craftingManager;
+	private ConsoleCommandSender $consoleSender;
 
-	private $forceLanguage = false;
+	private int $maxPlayers;
+	private bool $autoSave;
 
-	private $serverID;
+	private ?RCON $rcon = null;
 
-	private $autoloader;
-	private $filePath;
-	private $dataPath;
-	private $pluginPath;
+	private EntityMetadataStore $entityMetadata;
+	private PlayerMetadataStore $playerMetadata;
+	private LevelMetadataStore $levelMetadata;
 
-	private $uniquePlayers = [];
+	private Network $network;
+	private bool $networkCompressionAsync = true;
+	private bool $autoTickRate = true;
+	private int $autoTickRateLimit = 20;
+	private bool $alwaysTickPlayers = false;
+	private int $baseTickRate = 1;
 
-	/** @var QueryHandler */
-	private $queryHandler;
+	private int $autoSaveTicker = 0;
+	private int $autoSaveTicks = 6000;
 
-	/** @var QueryRegenerateEvent */
-	private $queryRegenerateTask = null;
+	private BaseLang $baseLang;
 
-	/** @var Config */
-	private $properties;
+	private bool $forceLanguage = false;
 
-	private $propertyCache = [];
+	private string|int $serverID;
 
-	/** @var Config */
-	private $config;
+	private array $uniquePlayers = [];
+
+	private QueryHandler $queryHandler;
+
+	private ?QueryRegenerateEvent $queryRegenerateTask = null;
+
+	private Config $properties;
+
+	private array $propertyCache = [];
+
+	private Config $config;
 
 	/** @var Player[] */
-	private $players = [];
+	private array $players = [];
 
 	/** @var Player[] */
-	private $playerList = [];
+	private array $playerList = [];
 
-	private $identifiers = [];
+	private array $identifiers = [];
 
 	/** @var Level[] */
-	private $levels = [];
+	private array $levels = [];
 
 	/** @var Level */
-	private $levelDefault = null;
+	private ?Level $levelDefault = null;
 
 	/**
 	 * @param ClassLoader $autoloader
@@ -261,7 +232,12 @@ class Server
 	 * @param string $dataPath
 	 * @param string $pluginPath
 	 */
-	public function __construct(ClassLoader $autoloader, ThreadedLogger $logger, $filePath, $dataPath, $pluginPath)
+	public function __construct(
+		private ClassLoader $autoloader,
+		private ThreadedLogger $logger,
+		private string $filePath,
+		private string $dataPath,
+		private string $pluginPath)
 	{
 		self::$instance = $this;
 		self::$sleeper = new Threaded;
@@ -346,17 +322,17 @@ class Server
 			ServerScheduler::$WORKERS = $poolSize;
 
 			if ($this->getProperty("network.batch-threshold", 256) >= 0) {
-				Network::$BATCH_THRESHOLD = (int)$this->getProperty("network.batch-threshold", 256);
+				Network::$BATCH_THRESHOLD = (int) $this->getProperty("network.batch-threshold", 256);
 			} else {
 				Network::$BATCH_THRESHOLD = -1;
 			}
 			$this->networkCompressionLevel = $this->getProperty("network.compression-level", 7);
 			$this->networkCompressionAsync = $this->getProperty("network.async-compression", true);
 
-			$this->autoTickRate = (bool)$this->getProperty("level-settings.auto-tick-rate", true);
-			$this->autoTickRateLimit = (int)$this->getProperty("level-settings.auto-tick-rate-limit", 20);
-			$this->alwaysTickPlayers = (int)$this->getProperty("level-settings.always-tick-players", false);
-			$this->baseTickRate = (int)$this->getProperty("level-settings.base-tick-rate", 1);
+			$this->autoTickRate = (bool) $this->getProperty("level-settings.auto-tick-rate", true);
+			$this->autoTickRateLimit = (int) $this->getProperty("level-settings.auto-tick-rate-limit", 20);
+			$this->alwaysTickPlayers = (int) $this->getProperty("level-settings.always-tick-players", false);
+			$this->baseTickRate = (int) $this->getProperty("level-settings.base-tick-rate", 1);
 
 			$this->scheduler = new ServerScheduler();
 
@@ -368,8 +344,8 @@ class Server
 			$this->playerMetadata = new PlayerMetadataStore();
 			$this->levelMetadata = new LevelMetadataStore();
 
-			$this->operators = new Config($this->dataPath . "ops.txt", Config::ENUM);
-			$this->whitelist = new Config($this->dataPath . "white-list.txt", Config::ENUM);
+			$this->operators = new Config($this->dataPath . "ops.txt", Config::ENUM );
+			$this->whitelist = new Config($this->dataPath . "white-list.txt", Config::ENUM );
 			if (file_exists($this->dataPath . "banned.txt") and !file_exists($this->dataPath . "banned-players.txt")) {
 				@rename($this->dataPath . "banned.txt", $this->dataPath . "banned-players.txt");
 			}
@@ -387,7 +363,7 @@ class Server
 				$this->setConfigInt("difficulty", 3);
 			}
 
-			define('pocketmine\DEBUG', (int)$this->getProperty("debug.level", 1));
+			define('pocketmine\DEBUG', (int) $this->getProperty("debug.level", 1));
 
 			ini_set('assert.exception', 1);
 
@@ -438,9 +414,10 @@ class Server
 			$this->pluginManager = new PluginManager($this, $this->commandMap);
 			$this->pluginManager->subscribeToPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE, $this->consoleSender);
 			$this->pluginManager->setUseTimings($this->getProperty("settings.enable-profiling", false));
-			$this->profilingTickRate = (float)$this->getProperty("settings.profile-report-trigger", 20);
+			$this->profilingTickRate = (float) $this->getProperty("settings.profile-report-trigger", 20);
 			$this->pluginManager->registerInterface(PharPluginLoader::class);
 			$this->pluginManager->registerInterface(ScriptPluginLoader::class);
+			$this->pluginManager->registerInterface(FolderPluginLoader::class);
 
 			register_shutdown_function([$this, "crashDump"]);
 
@@ -467,7 +444,7 @@ class Server
 			Generator::addGenerator(Nether::class, "hell");
 			Generator::addGenerator(Nether::class, "nether");
 
-			foreach ((array)$this->getProperty("worlds", []) as $name => $worldSetting) {
+			foreach ((array) $this->getProperty("worlds", []) as $name => $worldSetting) {
 				if ($this->loadLevel($name) === false) {
 					$seed = $this->getProperty("worlds.$name.seed", time());
 					$options = explode(":", $this->getProperty("worlds.$name.generator", Generator::getGenerator("default")));
@@ -496,7 +473,7 @@ class Server
 					if (!is_numeric($seed) or bccomp($seed, "9223372036854775807") > 0) {
 						$seed = Utils::javaStringHash($seed);
 					} elseif (PHP_INT_SIZE === 8) {
-						$seed = (int)$seed;
+						$seed = (int) $seed;
 					}
 					$this->generateLevel($default, $seed === 0 ? time() : $seed);
 				}
@@ -515,7 +492,7 @@ class Server
 			}
 
 			if ($this->getProperty("ticks-per.autosave", 6000) > 0) {
-				$this->autoSaveTicks = (int)$this->getProperty("ticks-per.autosave", 6000);
+				$this->autoSaveTicks = (int) $this->getProperty("ticks-per.autosave", 6000);
 			}
 
 			$this->enablePlugins(PluginLoadOrder::POSTWORLD);
@@ -552,7 +529,7 @@ class Server
 	{
 		$v = getopt("", ["$variable::"]);
 		if (isset($v[$variable])) {
-			return (string)$v[$variable];
+			return (string) $v[$variable];
 		}
 
 		return $this->properties->exists($variable) ? $this->properties->get($variable) : $defaultValue;
@@ -742,12 +719,12 @@ class Server
 				return false;
 			}
 			/*if(file_exists($path)){
-				$level = new LevelImport($path);
-				if($level->import() === false){ // Try importing a world
-					return false;
-				}
+			$level = new LevelImport($path);
+			if($level->import() === false){ // Try importing a world
+			return false;
+			}
 			}else{
-				return false;
+			return false;
 			}*/
 		}
 
@@ -778,7 +755,7 @@ class Server
 			return false;
 		}
 
-		$seed = $seed === null ? Binary::readInt(random_bytes(4)) : (int)$seed;
+		$seed = $seed === null ? Binary::readInt(random_bytes(4)) : (int) $seed;
 
 		if (!isset($options["preset"])) {
 			$options["preset"] = $this->getConfigString("generator-settings", "");
@@ -1031,7 +1008,7 @@ class Server
 	 */
 	public static function getGamemodeString($mode)
 	{
-		switch ((int)$mode) {
+		switch ((int) $mode) {
 			case Player::SURVIVAL:
 				return "%gameMode.survival";
 			case Player::CREATIVE:
@@ -1334,7 +1311,7 @@ class Server
 	 */
 	public function setAutoSave($value)
 	{
-		$this->autoSave = (bool)$value;
+		$this->autoSave = (bool) $value;
 		foreach ($this->getLevels() as $level) {
 			$level->setAutoSave($this->autoSave);
 		}
@@ -1492,22 +1469,22 @@ class Server
 	public static function getGamemodeFromString($str)
 	{
 		switch (strtolower(trim($str))) {
-			case (string)Player::SURVIVAL:
+			case (string) Player::SURVIVAL:
 			case "survival":
 			case "s":
 				return Player::SURVIVAL;
 
-			case (string)Player::CREATIVE:
+			case (string) Player::CREATIVE:
 			case "creative":
 			case "c":
 				return Player::CREATIVE;
 
-			case (string)Player::ADVENTURE:
+			case (string) Player::ADVENTURE:
 			case "adventure":
 			case "a":
 				return Player::ADVENTURE;
 
-			case (string)Player::SPECTATOR:
+			case (string) Player::SPECTATOR:
 			case "spectator":
 			case "view":
 			case "v":
@@ -1661,10 +1638,10 @@ class Server
 	{
 		$v = getopt("", ["$variable::"]);
 		if (isset($v[$variable])) {
-			return (int)$v[$variable];
+			return (int) $v[$variable];
 		}
 
-		return $this->properties->exists($variable) ? (int)$this->properties->get($variable) : (int)$defaultValue;
+		return $this->properties->exists($variable) ? (int) $this->properties->get($variable) : (int) $defaultValue;
 	}
 
 	/**
@@ -1844,11 +1821,11 @@ class Server
 				new DoubleTag(2, $spawn->z)
 			]),
 			new StringTag("Level", $this->getDefaultLevel()->getName()),
-			// new StringTag("SpawnLevel", $this->getDefaultLevel()->getName()),
-			// new IntTag("SpawnX", (int) $spawn->x),
-			// new IntTag("SpawnY", (int) $spawn->y),
-			// new IntTag("SpawnZ", (int) $spawn->z),
-			// new ByteTag("SpawnForced", 1), // TODO
+				// new StringTag("SpawnLevel", $this->getDefaultLevel()->getName()),
+				// new IntTag("SpawnX", (int) $spawn->x),
+				// new IntTag("SpawnY", (int) $spawn->y),
+				// new IntTag("SpawnZ", (int) $spawn->z),
+				// new ByteTag("SpawnForced", 1), // TODO
 			new ListTag("Inventory", []),
 			new CompoundTag("Achievements", []),
 			new IntTag("playerGameType", $this->getGamemode()),
@@ -1875,15 +1852,15 @@ class Server
 
 		if (file_exists($path . "$name.yml")) { // Importing old PocketMine-MP files
 			$data = new Config($path . "$name.yml", Config::YAML, []);
-			$nbt["playerGameType"] = (int)$data->get("gamemode");
+			$nbt["playerGameType"] = (int) $data->get("gamemode");
 			$nbt["Level"] = $data->get("position")["level"];
 			$nbt["Pos"][0] = $data->get("position")["x"];
 			$nbt["Pos"][1] = $data->get("position")["y"];
 			$nbt["Pos"][2] = $data->get("position")["z"];
 			$nbt["SpawnLevel"] = $data->get("spawn")["level"];
-			$nbt["SpawnX"] = (int)$data->get("spawn")["x"];
-			$nbt["SpawnY"] = (int)$data->get("spawn")["y"];
-			$nbt["SpawnZ"] = (int)$data->get("spawn")["z"];
+			$nbt["SpawnX"] = (int) $data->get("spawn")["x"];
+			$nbt["SpawnY"] = (int) $data->get("spawn")["y"];
+			$nbt["SpawnZ"] = (int) $data->get("spawn")["z"];
 			$this->logger->notice($this->getLanguage()->translateString("pocketmine.data.playerOld", [$name]));
 			foreach ($data->get("inventory") as $slot => $item) {
 				if (count($item) === 3) {
@@ -2232,7 +2209,7 @@ class Server
 	 */
 	public function setConfigInt($variable, $value)
 	{
-		$this->properties->set($variable, (int)$value);
+		$this->properties->set($variable, (int) $value);
 	}
 
 	/**

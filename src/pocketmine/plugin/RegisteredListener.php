@@ -32,7 +32,7 @@ class RegisteredListener
 	/** @var Listener */
 	private $listener;
 
-	/** @var int */
+	/** @var \pocketmine\event\EventPriority */
 	private $priority;
 
 	/** @var Plugin */
@@ -83,7 +83,7 @@ class RegisteredListener
 	}
 
 	/**
-	 * @return int
+	 * @return \pocketmine\event\EventPriority
 	 */
 	public function getPriority()
 	{

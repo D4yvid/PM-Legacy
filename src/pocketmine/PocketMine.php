@@ -128,7 +128,7 @@ namespace pocketmine {
 		}
 
 		if (version_compare($pthreads_version, "3.1.5") < 0) {
-			$missingExtensions[] = "pthreads >= 3.1.5 is required, while you have $pthreads_version.";
+			$missingExtensions[] = "pthreads >= 3.1.5";
 			++$errors;
 		}
 
@@ -181,7 +181,6 @@ namespace pocketmine {
 	 * This is the only non-class based file on this project.
 	 * Enjoy it as much as I did writing it. I don't want to do it again.
 	 */
-
 
 	checkPHPBinary();
 

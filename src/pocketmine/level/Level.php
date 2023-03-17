@@ -878,8 +878,9 @@ class Level implements ChunkManager, Metadatable
 	public function unregisterGenerator()
 	{
 		$size = $this->server->getScheduler()->getAsyncTaskPoolSize();
+
 		for ($i = 0; $i < $size; ++$i) {
-			$this->server->getScheduler()->scheduleAsyncTaskToWorker(new GeneratorUnregisterTask($this, $this->generatorInstance), $i);
+			$this->server->getScheduler()->scheduleAsyncTaskToWorker(new GeneratorUnregisterTask($this), $i);
 		}
 	}
 
@@ -2231,7 +2232,7 @@ class Level implements ChunkManager, Metadatable
 		$itemTag->setName("Item");
 
 		if ($item->getId() > 0 and $item->getCount() > 0) {
-			$itemEntity = Entity::createEntity("Item", $this->getChunk($source->getX() >> 4, $source->getZ() >> 4, true), new CompoundTag("", [
+			$itemEntity = Entity::createEntity("Item", $this->getChunk($source->getFloorX() >> 4, $source->getFloorZ() >> 4, true), new CompoundTag("", [
 				"Pos" => new ListTag("Pos", [
 					new DoubleTag("", $source->getX()),
 					new DoubleTag("", $source->getY()),

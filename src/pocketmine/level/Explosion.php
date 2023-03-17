@@ -77,11 +77,27 @@ class Explosion
 	 */
 	public function explodeA()
 	{
+		$blockedBlocks = [
+			BlockIds::WATER,
+			BlockIds::STILL_WATER,
+			BlockIds::LAVA,
+			BlockIds::STILL_LAVA,
+			BlockIds::AIR,
+			BlockIds::OBSIDIAN,
+			BlockIds::BEDROCK,
+			BlockIds::INVISIBLE_BEDROCK,
+			BlockIds::NETHER_REACTOR,
+			BlockIds::GLOWING_OBSIDIAN
+		];
+
 		if ($this->size < 0.1) {
 			return false;
 		}
 
-		if ($this->what instanceof Entity && $this->level->getBlock($this->what)->getId() == BlockIds::WATER)
+		if ($this->what instanceof Entity && ($id = $this->level->getBlock($this->what)->getId()) == BlockIds::WATER ||
+			$id == BlockIds::STILL_WATER ||
+			$id == BlockIds::LAVA ||
+			$id == BlockIds::STILL_LAVA)
 			return false;
 
 		for ($x = -$this->size; $x < $this->size; $x++) {
@@ -89,8 +105,10 @@ class Explosion
 				for ($z = -$this->size; $z < $this->size; $z++) {
 					$block = $this->level->getBlockFromXYZ($this->source->x + $x, $this->source->y + $y, $this->source->z + $z);
 
-					if ($block->getId() == 0 ||
-						$block->distance($this->source) > 2 && mt_rand(0, 10) > 5)
+					if (in_array($block->getId(), $blockedBlocks) ||
+						$block->distance($this->source) > 2 &&
+						mt_rand(0, 10) > 5 &&
+						$block->getId() != BlockIds::TNT)
 						continue;
 
 					/* Store all coordinate data relative to the center inside of a 32-bit integer */
@@ -141,6 +159,7 @@ class Explosion
 			if ($distance <= 1) {
 				$motion = $entity->subtract($this->source)->normalize();
 				$impact = (1 - $distance) * $this->kb;
+				// TODO: Entity damage (disabled for testing) 
 
 				$entity->setMotion($motion->multiply($impact));
 			}
@@ -153,7 +172,7 @@ class Explosion
 
 			$x = ($source->x + (($coord >> 19) & 0xFF)) + ($negX ? -$this->size : 0);
 			$y = ($source->y + (($coord >> 11) & 0xFF)) + ($negY ? -$this->size : 0);
-			$z = ($source->z + (($coord >> 3) & 0xFF)) + ($negZ ? -$this->size : 0);
+			$z = ($source->z + (($coord >>  3) & 0xFF)) + ($negZ ? -$this->size : 0);
 
 			$block = $this->level->getBlockFromXYZ($x, $y, $z);
 

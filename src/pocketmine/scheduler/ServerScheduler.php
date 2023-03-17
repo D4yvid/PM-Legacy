@@ -163,7 +163,7 @@ class ServerScheduler
 		$this->asyncPool->submitTaskToWorker($task, $worker);
 	}
 
-	public function getAsyncTaskPoolSize()
+	public function getAsyncTaskPoolSize(): int
 	{
 		return $this->asyncPool->getSize();
 	}

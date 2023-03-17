@@ -23,7 +23,6 @@
 
 namespace pocketmine;
 
-
 use InvalidStateException;
 use pocketmine\block\Air;
 use pocketmine\block\Block;
@@ -141,22 +140,17 @@ use pocketmine\utils\UUID;
 use raklib\Binary;
 use SplObjectStorage;
 
-
-
-
 /**
  * Main class that handles networking, recovery, and packet sending to the server part
  */
 class Player extends Human implements CommandSender, InventoryHolder, ChunkLoader, IPlayer
 {
 
-
 	const SURVIVAL = 0;
 	const CREATIVE = 1;
 	const ADVENTURE = 2;
 	const SPECTATOR = 3;
 	const VIEW = Player::SPECTATOR;
-
 
 	const SURVIVAL_SLOTS = 36;
 	const CREATIVE_SLOTS = 112;
@@ -981,8 +975,6 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
 	 */
 	public final function close($message = "", $reason = "generic reason", $notify = true)
 	{
-
-
 		if ($this->connected and !$this->closed) {
 			if ($notify and strlen((string) $reason) > 0) {
 				$pk = new DisconnectPacket;
@@ -1013,7 +1005,7 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
 			}
 
 
-			foreach ($this->usedChunks as $index => $d) {
+			foreach ($this->usedChunks as $index => $_) {
 				Level::getXZ($index, $chunkX, $chunkZ);
 				$this->level->unregisterChunkLoader($this, $chunkX, $chunkZ);
 				unset($this->usedChunks[$index]);
@@ -1994,13 +1986,15 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
 			}
 
 
+			/** @var int */
 			$X = null;
+
+			/** @var int */
 			$Z = null;
+			
 			Level::getXZ($index, $X, $Z);
 
-
 			++$count;
-
 
 			$this->usedChunks[$index] = false;
 			$this->level->registerChunkLoader($this, $X, $Z, false);
@@ -3993,7 +3987,7 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
 
 	public function onChunkChanged(FullChunk $chunk)
 	{
-		$this->loadQueue[Level::chunkHash($chunk->getX(), $chunk->getZ())] = abs(($this->x >> 4) - $chunk->getX()) + abs(($this->z >> 4) - $chunk->getZ());
+		$this->loadQueue[Level::chunkHash($chunk->getFloorX(), $chunk->getFloorZ())] = abs(($this->getFloorX() >> 4) - $chunk->getFloorX()) + abs(($this->getFloorZ() >> 4) - $chunk->getFloorZ());
 	}
 
 

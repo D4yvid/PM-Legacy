@@ -504,6 +504,12 @@ abstract class BaseFullChunk implements FullChunk
 
 	public function setBiomeColor($x, $z, $R, $G, $B)
 	{
+		$x = (int) floor($x);
+		$z = (int) floor($z);
+		$R = (int) floor($R);
+		$G = (int) floor($G);
+		$B = (int) floor($B);
+
 		$this->hasChanged = true;
 		$this->biomeColors[($z << 4) + $x] = ($this->biomeColors[($z << 4) + $x] & 0xFF000000) | (($R & 0xFF) << 16) | (($G & 0xFF) << 8) | ($B & 0xFF);
 	}

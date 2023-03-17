@@ -45,12 +45,12 @@ class HandlerList
 	public function __construct()
 	{
 		$this->handlerSlots = [
-			EventPriority::LOWEST => [],
-			EventPriority::LOW => [],
-			EventPriority::NORMAL => [],
-			EventPriority::HIGH => [],
-			EventPriority::HIGHEST => [],
-			EventPriority::MONITOR => []
+			EventPriority::LOWEST->value() 	=> [],
+			EventPriority::LOW->value()     => [],
+			EventPriority::NORMAL->value()  => [],
+			EventPriority::HIGH->value()    => [],
+			EventPriority::HIGHEST->value() => [],
+			EventPriority::MONITOR->value() => []
 		];
 		self::$allLists[] = $this;
 	}
@@ -119,8 +119,8 @@ class HandlerList
 				$this->handlers = null;
 			}
 		} elseif ($object instanceof RegisteredListener) {
-			if (isset($this->handlerSlots[$object->getPriority()][spl_object_hash($object)])) {
-				unset($this->handlerSlots[$object->getPriority()][spl_object_hash($object)]);
+			if (isset($this->handlerSlots[$object->getPriority()->value()][spl_object_hash($object)])) {
+				unset($this->handlerSlots[$object->getPriority()->value()][spl_object_hash($object)]);
 				$this->handlers = null;
 			}
 		}
@@ -151,14 +151,11 @@ class HandlerList
 	 */
 	public function register(RegisteredListener $listener)
 	{
-		if ($listener->getPriority() < EventPriority::MONITOR or $listener->getPriority() > EventPriority::LOWEST) {
-			return;
-		}
-		if (isset($this->handlerSlots[$listener->getPriority()][spl_object_hash($listener)])) {
+		if (isset($this->handlerSlots[$listener->getPriority()->value()][spl_object_hash($listener)])) {
 			throw new InvalidStateException("This listener is already registered to priority " . $listener->getPriority());
 		}
 		$this->handlers = null;
-		$this->handlerSlots[$listener->getPriority()][spl_object_hash($listener)] = $listener;
+		$this->handlerSlots[$listener->getPriority()->value()][spl_object_hash($listener)] = $listener;
 	}
 
 	/**
